@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Command,
+  Contact,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -25,6 +26,11 @@ export const sidebarData: SidebarData = {
           title: 'Dashboard',
           url: '/',
           icon: LayoutDashboard,
+        },
+        {
+          title: 'Customers',
+          url: '/customers',
+          icon: Contact,
         },
       ],
     },
