@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { getCookie } from '@/lib/cookies'
 
-const ACCESS_TOKEN = '***'
+const ACCESS_TOKEN = 'pn_access_token'
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: ({ location }) => {
