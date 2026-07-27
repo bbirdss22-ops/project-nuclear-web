@@ -21,7 +21,9 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().auth.reset();
-      window.location.href = '/sign-in';
+      if (!window.location.pathname.includes('/sign-in')) {
+        window.location.href = '/sign-in';
+      }
     }
     return Promise.reject(error);
   },
