@@ -1,0 +1,193 @@
+import { useState } from 'react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Loader2, UserPlus } from 'lucide-react'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import { createCustomer } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+
+const formSchema = z.object({
+  firstName: z.string().min(1, 'กรุณากรอกชื่อ'),
+  lastName: z.string().min(1, 'กรุณากรอกนามสกุล'),
+  phone: z
+    .string()
+    .min(9, 'เบอร์โทรไม่ถูกต้อง')
+    .max(10, 'เบอร์โทรไม่ถูกต้อง'),
+  email: z.string().email('อีเมลไม่ถูกต้อง').optional().or(z.literal('')),
+  address: z.string().optional(),
+})
+
+type FormValues = z.infer<typeof formSchema>
+
+interface RegisterFormProps {
+  lineUserId?: string
+  referrerId?: string
+}
+
+export function RegisterForm({ lineUserId, referrerId }: RegisterFormProps) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const navigate = useNavigate()
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      phone: '',
+      email: '',
+      address: '',
+    },
+  })
+
+  async function onSubmit(data: FormValues) {
+    setIsLoading(true)
+
+    try {
+      await createCustomer({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        email: data.email || undefined,
+        address: data.address || undefined,
+        lineUserId: lineUserId || undefined,
+        referrerId: referrerId || undefined,
+      })
+
+      setIsSuccess(true)
+      toast.success('สมัครสมาชิกสำเร็จ! 🎉')
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง'
+      toast.error(msg)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isSuccess) {
+    return (
+      <Card className='max-w-md mx-auto'>
+        <CardHeader>
+          <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
+          <CardDescription className='text-center text-base'>
+            ขอบคุณที่สมัครสมาชิก<br />
+            เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='flex justify-center'>
+          <Button onClick={() => navigate({ to: '/' })}>
+            กลับหน้าหลัก
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4'>
+        <div className='grid grid-cols-2 gap-3'>
+          <FormField
+            control={form.control}
+            name='firstName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ชื่อ *</FormLabel>
+                <FormControl>
+                  <Input placeholder='สมชาย' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='lastName'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>นามสกุล *</FormLabel>
+                <FormControl>
+                  <Input placeholder='ใจดี' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name='phone'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>เบอร์โทรศัพท์ *</FormLabel>
+              <FormControl>
+                <Input placeholder='0812345678' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='email'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>อีเมล</FormLabel>
+              <FormControl>
+                <Input placeholder='somchai@example.com' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='address'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ที่อยู่</FormLabel>
+              <FormControl>
+                <Input placeholder='123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button className='w-full mt-2' size='lg' disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 className='animate-spin' />
+          ) : (
+            <UserPlus />
+          )}
+          สมัครสมาชิก
+        </Button>
+      </form>
+    </Form>
+  )
+}
