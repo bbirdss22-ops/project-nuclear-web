@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createCustomer } from '@/lib/api'
+import { createCustomer, consumeRegistrationToken } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -40,9 +40,10 @@ type FormValues = z.infer<typeof formSchema>
 interface RegisterFormProps {
   lineUserId?: string
   referrerId?: string
+  token?: string
 }
 
-export function RegisterForm({ lineUserId, referrerId }: RegisterFormProps) {
+export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const navigate = useNavigate()
@@ -62,7 +63,7 @@ export function RegisterForm({ lineUserId, referrerId }: RegisterFormProps) {
     setIsLoading(true)
 
     try {
-      await createCustomer({
+      const customer = await createCustomer({
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
@@ -71,6 +72,16 @@ export function RegisterForm({ lineUserId, referrerId }: RegisterFormProps) {
         lineUserId: lineUserId || undefined,
         referrerId: referrerId || undefined,
       })
+
+      // Consume registration token if present
+      if (token && customer?.id) {
+        try {
+          await consumeRegistrationToken(token, customer.id)
+        } catch {
+          // Non-fatal: token may already be handled
+          console.warn('Failed to consume registration token:', token)
+        }
+      }
 
       setIsSuccess(true)
       toast.success('สมัครสมาชิกสำเร็จ! 🎉')

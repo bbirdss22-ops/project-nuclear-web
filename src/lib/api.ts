@@ -126,6 +126,24 @@ export async function updateCustomer(id: string, data: Partial<CreateCustomerReq
   return res.data;
 }
 
+// ─── Registration Token ────────────────────────────────
+
+export interface RegistrationTokenValidation {
+  valid: boolean;
+  lineUserId: string;
+  alreadyRegistered: boolean;
+}
+
+export async function validateRegistrationToken(token: string): Promise<RegistrationTokenValidation> {
+  const res = await api.get<RegistrationTokenValidation>(`/api/auth/registration-token/${token}`);
+  return res.data;
+}
+
+export async function consumeRegistrationToken(token: string, customerId: string) {
+  const res = await api.post(`/api/auth/registration-token/${token}/consume`, { customerId });
+  return res.data;
+}
+
 export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
   const response = await api.post('/api/auth/change-password', { currentPassword, newPassword })
   return response.data

@@ -5,6 +5,7 @@ import { Register } from '@/features/register'
 const searchSchema = z.object({
   lineUserId: z.string().optional(),
   referrerId: z.string().optional(),
+  token: z.string().optional(),
 })
 
 export const Route = createFileRoute('/register')({
