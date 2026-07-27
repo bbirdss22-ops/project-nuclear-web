@@ -54,6 +54,9 @@ const queryClient = new QueryClient({
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
+          // Avoid navigating if already on sign-in page
+          const currentPath = window.location.pathname
+          if (currentPath === '/sign-in') return
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }
@@ -61,7 +64,11 @@ const queryClient = new QueryClient({
           toast.error('Internal Server Error!')
           // Only navigate to error page in production to avoid disrupting HMR in development
           if (import.meta.env.PROD) {
-            router.navigate({ to: '/500' })
+            // Don't redirect to /500 if we're on the root - might be an auth issue
+            const currentPath = window.location.pathname
+            if (currentPath !== '/' && currentPath !== '') {
+              router.navigate({ to: '/500' })
+            }
           }
         }
         if (error.response?.status === 403) {
