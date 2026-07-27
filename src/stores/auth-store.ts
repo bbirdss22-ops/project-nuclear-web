@@ -18,6 +18,17 @@ interface AuthStore {
   login: (user: User, token: string) => void
   logout: () => void
   loadFromCookie: () => void
+  // Nested auth object for backward compatibility
+  auth: {
+    user: User | null
+    accessToken: string
+    setUser: (user: User | null) => void
+    setAccessToken: (token: string) => void
+    resetAccessToken: () => void
+    reset: () => void
+    login: (user: User, token: string) => void
+    logout: () => void
+  }
 }
 
 export const useAuthStore = create<AuthStore>()((set, get) => ({
@@ -47,5 +58,27 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
     if (token) {
       set({ accessToken: token, isAuthenticated: true })
     }
+  },
+
+  // Nested auth object delegates to flat methods
+  auth: {
+    get user() {
+      return get().user
+    },
+    get accessToken() {
+      return get().accessToken
+    },
+    setUser: (user) => get().setUser(user),
+    setAccessToken: (token) => get().setAccessToken(token),
+    resetAccessToken: () => {
+      removeCookie(ACCESS_TOKEN)
+      set({ accessToken: '' })
+    },
+    reset: () => {
+      removeCookie(ACCESS_TOKEN)
+      set({ user: null, accessToken: '', isAuthenticated: false })
+    },
+    login: (user, token) => get().login(user, token),
+    logout: () => get().logout(),
   },
 }))
