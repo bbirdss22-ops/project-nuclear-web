@@ -1,53 +1,51 @@
 import { create } from 'zustand'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN = 'pn_access_token'
 
-interface AuthUser {
-  accountNo: string
-  email: string
-  role: string[]
-  exp: number
+export interface User {
+  id: string
+  username: string
+  role: string
 }
 
-interface AuthState {
-  auth: {
-    user: AuthUser | null
-    setUser: (user: AuthUser | null) => void
-    accessToken: string
-    setAccessToken: (accessToken: string) => void
-    resetAccessToken: () => void
-    reset: () => void
-  }
+interface AuthStore {
+  user: User | null
+  accessToken: string
+  isAuthenticated: boolean
+  setUser: (user: User | null) => void
+  setAccessToken: (token: string) => void
+  login: (user: User, token: string) => void
+  logout: () => void
+  loadFromCookie: () => void
 }
 
-export const useAuthStore = create<AuthState>()((set) => {
-  const cookieState = getCookie(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
-  return {
-    auth: {
-      user: null,
-      setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
-      accessToken: initToken,
-      setAccessToken: (accessToken) =>
-        set((state) => {
-          setCookie(ACCESS_TOKEN, JSON.stringify(accessToken))
-          return { ...state, auth: { ...state.auth, accessToken } }
-        }),
-      resetAccessToken: () =>
-        set((state) => {
-          removeCookie(ACCESS_TOKEN)
-          return { ...state, auth: { ...state.auth, accessToken: '' } }
-        }),
-      reset: () =>
-        set((state) => {
-          removeCookie(ACCESS_TOKEN)
-          return {
-            ...state,
-            auth: { ...state.auth, user: null, accessToken: '' },
-          }
-        }),
-    },
-  }
-})
+export const useAuthStore = create<AuthStore>()((set, get) => ({
+  user: null,
+  accessToken: '',
+  isAuthenticated: false,
+
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+
+  setAccessToken: (accessToken) => {
+    setCookie(ACCESS_TOKEN, accessToken)
+    set({ accessToken })
+  },
+
+  login: (user, token) => {
+    setCookie(ACCESS_TOKEN, token)
+    set({ user, accessToken: token, isAuthenticated: true })
+  },
+
+  logout: () => {
+    removeCookie(ACCESS_TOKEN)
+    set({ user: null, accessToken: '', isAuthenticated: false })
+  },
+
+  loadFromCookie: () => {
+    const token = getCookie(ACCESS_TOKEN)
+    if (token) {
+      set({ accessToken: token, isAuthenticated: true })
+    }
+  },
+}))

@@ -16,6 +16,7 @@ import {
   UserCog,
   UserX,
   Users,
+  Contact,
   MessagesSquare,
   ShieldCheck,
   AudioWaveform,
@@ -77,6 +78,11 @@ export const sidebarData: SidebarData = {
           title: 'Users',
           url: '/users',
           icon: Users,
+        },
+        {
+          title: 'Customers',
+          url: '/customers',
+          icon: Contact,
         },
         {
           title: 'Secured by Clerk',
