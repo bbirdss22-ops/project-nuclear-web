@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Main } from '@/components/layout/main'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z
@@ -71,8 +72,8 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <div className='flex min-h-screen items-center justify-center'>
-      <Card className='mx-auto max-w-md'>
+    <Main className='flex items-start justify-center pt-8'>
+      <Card className='w-full max-w-md'>
         <CardHeader>
           <CardTitle className='flex items-center gap-2 text-xl'>
             <Lock className='h-5 w-5' />
@@ -149,6 +150,6 @@ export function ChangePasswordForm() {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </Main>
   )
 }

@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Loader2, Search as SearchIcon } from 'lucide-react'
+import { Loader2, SearchIcon } from 'lucide-react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { getCustomers, searchCustomers } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Main } from '@/components/layout/main'
 import { customerColumns } from './customer-columns'
 
 export function Customers() {
@@ -61,18 +62,13 @@ export function Customers() {
   const totalPages = data?.totalPages ?? 0
 
   return (
-    <div className='space-y-6'>
-      <div className='flex flex-wrap items-end justify-between gap-2'>
-        <div>
-          <h2 className='text-2xl font-bold tracking-tight'>Customers</h2>
-          <p className='text-muted-foreground'>
-            Manage your customers and their information here.
-          </p>
-        </div>
+    <Main>
+      <div className='mb-2 flex items-center justify-between space-y-2'>
+        <h1 className='text-2xl font-bold tracking-tight'>Customers</h1>
       </div>
 
       {/* Search */}
-      <div className='relative w-full max-w-sm'>
+      <div className='relative w-full max-w-sm mb-4'>
         <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
         <Input
           placeholder='Search customers...'
@@ -154,7 +150,7 @@ export function Customers() {
 
       {/* Pagination */}
       {totalPages > 0 && (
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between mt-4'>
           <p className='text-sm text-muted-foreground'>
             Showing{' '}
             {totalItems > 0 ? (page - 1) * pageSize + 1 : 0}-
@@ -206,6 +202,6 @@ export function Customers() {
           </div>
         </div>
       )}
-    </div>
+    </Main>
   )
 }

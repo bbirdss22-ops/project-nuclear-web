@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Main } from '@/components/layout/main'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface CustomerDetailProps {
@@ -77,8 +78,8 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
   ]
 
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center gap-4'>
+    <Main>
+      <div className='flex items-center gap-4 mb-6'>
         <Button variant='outline' onClick={handleBack}>
           &larr; Back
         </Button>
@@ -106,6 +107,6 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
           </dl>
         </CardContent>
       </Card>
-    </div>
+    </Main>
   )
 }
