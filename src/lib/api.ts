@@ -126,4 +126,9 @@ export async function updateCustomer(id: string, data: Partial<CreateCustomerReq
   return res.data;
 }
 
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+  const response = await api.post('/api/auth/change-password', { currentPassword, newPassword })
+  return response.data
+}
+
 export default api;
