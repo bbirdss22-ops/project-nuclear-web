@@ -43,7 +43,7 @@ interface RegisterFormProps {
   token?: string
 }
 
-function RegisterSuccess({
+export function RegisterSuccess({
   customerCode,
 }: {
   customerCode: string | null
@@ -63,7 +63,7 @@ function RegisterSuccess({
   }, [countdown])
 
   return (
-    <Card className='max-w-md mx-auto'>
+    <Card className='max-w-2xl mx-auto'>
       <CardHeader>
         <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
         <CardDescription className='text-center text-base'>
@@ -105,10 +105,8 @@ function RegisterSuccess({
   )
 }
 
-export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProps) {
+export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: RegisterFormProps & { onSuccess?: (code: string) => void }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [customerCode, setCustomerCode] = useState<string | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -145,8 +143,7 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
         }
       }
 
-      setCustomerCode(customer.code ?? null)
-      setIsSuccess(true)
+      onSuccess?.(customer.code ?? '')
       toast.success('สมัครสมาชิกสำเร็จ! 🎉')
     } catch (error: any) {
       const msg =
@@ -157,10 +154,6 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (isSuccess) {
-    return <RegisterSuccess customerCode={customerCode} />
   }
 
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearch } from '@tanstack/react-router'
 import { AuthLayout } from '@/features/auth/auth-layout'
-import { RegisterForm } from './register-form'
+import { RegisterForm, RegisterSuccess } from './register-form'
 import {
   Card,
   CardContent,
@@ -26,6 +26,7 @@ export function Register() {
   const [tokenLoading, setTokenLoading] = useState(!!token)
   const [tokenError, setTokenError] = useState<string | null>(null)
   const [alreadyRegistered, setAlreadyRegistered] = useState(false)
+  const [successCode, setSuccessCode] = useState<string | null>(null)
 
   useEffect(() => {
     if (!token) return
@@ -56,6 +57,14 @@ export function Register() {
     resolveToken()
     return () => { cancelled = true }
   }, [token])
+
+  if (successCode) {
+    return (
+      <AuthLayout>
+        <RegisterSuccess customerCode={successCode} />
+      </AuthLayout>
+    )
+  }
 
   return (
     <AuthLayout>
@@ -98,6 +107,7 @@ export function Register() {
               lineUserId={resolvedLineUserId}
               referrerId={referrerId}
               token={token}
+              onSuccess={(code) => setSuccessCode(code)}
             />
           )}
         </CardContent>
