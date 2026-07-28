@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, type NavigateOptions } from '@tanstack/react-router'
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createCustomer, consumeRegistrationToken } from '@/lib/api'
@@ -41,6 +41,71 @@ interface RegisterFormProps {
   lineUserId?: string
   referrerId?: string
   token?: string
+}
+
+function RegisterSuccess({
+  customerCode,
+  navigate,
+}: {
+  customerCode: string | null
+  navigate: (opts: NavigateOptions) => void
+}) {
+  const [countdown, setCountdown] = useState(10)
+  const [closeFailed, setCloseFailed] = useState(false)
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      window.close()
+      // If close fails (browser blocks it), show fallback after a short delay
+      const fallbackTimer = setTimeout(() => setCloseFailed(true), 500)
+      return () => clearTimeout(fallbackTimer)
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [countdown])
+
+  return (
+    <Card className='max-w-md mx-auto'>
+      <CardHeader>
+        <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
+        <CardDescription className='text-center text-base'>
+          {customerCode ? (
+            <>
+              รหัสลูกค้าของคุณคือ:
+              <div className='mt-3 text-3xl font-bold tracking-wider text-primary'>
+                {customerCode}
+              </div>
+              <div className='mt-3 text-sm text-muted-foreground'>
+                📌 กรุณาจดรหัสนี้ไว้ใช้แจ้งเจ้าหน้าที่เวลาสอบถามหรือสั่งซื้อสินค้า
+              </div>
+            </>
+          ) : (
+            <>
+              ขอบคุณที่สมัครสมาชิก<br />
+              เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด
+            </>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className='flex flex-col items-center gap-4'>
+        <p className='text-lg text-muted-foreground'>
+          {closeFailed ? '✅ ปิดหน้านี้ได้เลย' : `⏰ ปิดหน้านี้ใน ${countdown} วินาที`}
+        </p>
+        <div className='flex gap-3'>
+          <Button onClick={() => navigate({ to: '/' })}>กลับหน้าหลัก</Button>
+          <Button
+            variant='secondary'
+            onClick={() => {
+              window.close()
+              setTimeout(() => setCloseFailed(true), 500)
+            }}
+          >
+            ปิดเลย
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProps) {
@@ -99,36 +164,7 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
   }
 
   if (isSuccess) {
-    return (
-      <Card className='max-w-md mx-auto'>
-        <CardHeader>
-          <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
-          <CardDescription className='text-center text-base'>
-            {customerCode ? (
-              <>
-                รหัสลูกค้าของคุณคือ:
-                <div className='mt-3 text-3xl font-bold tracking-wider text-primary'>
-                  {customerCode}
-                </div>
-                <div className='mt-3 text-sm text-muted-foreground'>
-                  📌 กรุณาจดรหัสนี้ไว้ใช้แจ้งเจ้าหน้าที่เวลาสอบถามหรือสั่งซื้อสินค้า
-                </div>
-              </>
-            ) : (
-              <>
-                ขอบคุณที่สมัครสมาชิก<br />
-                เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด
-              </>
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='flex justify-center'>
-          <Button onClick={() => navigate({ to: '/' })}>
-            กลับหน้าหลัก
-          </Button>
-        </CardContent>
-      </Card>
-    )
+    return <RegisterSuccess customerCode={customerCode} navigate={navigate} />
   }
 
   return (
