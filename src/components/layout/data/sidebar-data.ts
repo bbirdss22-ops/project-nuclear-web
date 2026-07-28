@@ -10,7 +10,7 @@ export const sidebarData: SidebarData = {
   user: {
     name: 'ผู้ดูแลระบบ',
     email: 'admin@เกษตรนิวเคลียร์.com',
-    avatar: '/avatars/shadcn.jpg',
+    avatar: '/avatars/01.png',
   },
   teams: [
     {

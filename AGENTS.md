@@ -1,6 +1,6 @@
 # AGENTS.md — project-nuclear-web
 
-Frontend สำหรับ Project Nuclear — Vite + React + TanStack Router + shadcn/ui
+Frontend สำหรับ Project Nuclear — Vite + React + TanStack Router
 
 ## 🚀 Quick Start
 
@@ -22,7 +22,7 @@ src/
 │   └── register/       # Line registration form
 ├── components/         # Shared UI components
 │   ├── layout/         # AppSidebar, header
-│   └── ui/             # shadcn/ui components
+│   └── ui/             # UI components (shadcn/ui)
 ├── lib/
 │   ├── api.ts          # API client (axios) + all endpoint functions
 │   └── cookies.ts      # Cookie utilities

@@ -309,7 +309,7 @@ but introduces breaking changes.
 ### Fix
 
 - update incorrect overflow side nav height
-- exclude shadcn components from linting and remove unused props
+- exclude UI components from linting and remove unused props
 - solve text overflow issue when nav text is long
 - replace nav with dropdown in mobile topnav
 - make sidebar scrollable when overflow
