@@ -46,6 +46,7 @@ interface RegisterFormProps {
 export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [customerCode, setCustomerCode] = useState<string | null>(null)
   const navigate = useNavigate()
 
   const form = useForm<FormValues>({
@@ -83,6 +84,7 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
         }
       }
 
+      setCustomerCode(customer.code ?? null)
       setIsSuccess(true)
       toast.success('สมัครสมาชิกสำเร็จ! 🎉')
     } catch (error: any) {
@@ -102,8 +104,22 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
         <CardHeader>
           <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
           <CardDescription className='text-center text-base'>
-            ขอบคุณที่สมัครสมาชิก<br />
-            เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด
+            {customerCode ? (
+              <>
+                รหัสลูกค้าของคุณคือ:
+                <div className='mt-3 text-3xl font-bold tracking-wider text-primary'>
+                  {customerCode}
+                </div>
+                <div className='mt-3 text-sm text-muted-foreground'>
+                  📌 กรุณาจดรหัสนี้ไว้ใช้แจ้งเจ้าหน้าที่เวลาสอบถามหรือสั่งซื้อสินค้า
+                </div>
+              </>
+            ) : (
+              <>
+                ขอบคุณที่สมัครสมาชิก<br />
+                เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด
+              </>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className='flex justify-center'>

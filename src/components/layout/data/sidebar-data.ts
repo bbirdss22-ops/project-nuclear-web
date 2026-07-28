@@ -8,15 +8,15 @@ import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
+    name: 'ผู้ดูแลระบบ',
+    email: 'admin@เกษตรนิวเคลียร์.com',
     avatar: '/avatars/shadcn.jpg',
   },
   teams: [
     {
-      name: 'Project Nuclear',
+      name: 'เกษตรนิวเคลียร์',
       logo: Command,
-      plan: 'Vite + ShadcnUI',
+      plan: 'ระบบบริหารสมาชิก',
     },
   ],
   navGroups: [

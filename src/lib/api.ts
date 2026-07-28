@@ -57,6 +57,7 @@ export interface CreateCustomerRequest {
 
 export interface Customer {
   id: string;
+  code: string | null;
   firstName: string;
   lastName: string;
   displayName?: string;
