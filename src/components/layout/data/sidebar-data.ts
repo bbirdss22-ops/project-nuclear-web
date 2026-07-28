@@ -1,9 +1,9 @@
 import {
   LayoutDashboard,
-  Command,
   Contact,
   Lock,
 } from 'lucide-react'
+import { LogoImage } from '@/assets/logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -15,7 +15,7 @@ export const sidebarData: SidebarData = {
   teams: [
     {
       name: 'เกษตรนิวเคลียร์',
-      logo: Command,
+      logo: LogoImage,
       plan: 'ระบบบริหารสมาชิก',
     },
   ],

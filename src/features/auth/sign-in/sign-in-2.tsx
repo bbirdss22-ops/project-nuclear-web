@@ -11,8 +11,8 @@ export function SignIn2() {
       <div className='lg:p-8'>
         <div className='mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-120 sm:p-8'>
           <div className='mb-4 flex items-center justify-center'>
-            <Logo className='me-2' />
-            <h1 className='text-xl font-medium'>แอดมิน</h1>
+            <Logo size={32} className='me-2' />
+            <h1 className='text-xl font-medium'>เกษตรนิวเคลียร์</h1>
           </div>
         </div>
         <div className='mx-auto flex w-full max-w-sm flex-col justify-center space-y-2'>
