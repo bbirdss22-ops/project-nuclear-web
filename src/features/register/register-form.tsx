@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate, type NavigateOptions } from '@tanstack/react-router'
+
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { createCustomer, consumeRegistrationToken } from '@/lib/api'
@@ -45,10 +45,8 @@ interface RegisterFormProps {
 
 function RegisterSuccess({
   customerCode,
-  navigate,
 }: {
   customerCode: string | null
-  navigate: (opts: NavigateOptions) => void
 }) {
   const [countdown, setCountdown] = useState(10)
   const [closeFailed, setCloseFailed] = useState(false)
@@ -92,7 +90,6 @@ function RegisterSuccess({
           {closeFailed ? '✅ ปิดหน้านี้ได้เลย' : `⏰ ปิดหน้านี้ใน ${countdown} วินาที`}
         </p>
         <div className='flex gap-3'>
-          <Button onClick={() => navigate({ to: '/' })}>กลับหน้าหลัก</Button>
           <Button
             variant='secondary'
             onClick={() => {
@@ -112,7 +109,6 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [customerCode, setCustomerCode] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -164,7 +160,7 @@ export function RegisterForm({ lineUserId, referrerId, token }: RegisterFormProp
   }
 
   if (isSuccess) {
-    return <RegisterSuccess customerCode={customerCode} navigate={navigate} />
+    return <RegisterSuccess customerCode={customerCode} />
   }
 
   return (
