@@ -59,6 +59,7 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
   const [rejectReason, setRejectReason] = useState('')
   const [reviewing, setReviewing] = useState(false)
   const [confirmApprove, setConfirmApprove] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const { data: customer, isLoading, error } = useQuery({
     queryKey: ['customer', customerId],
@@ -160,8 +161,8 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
       ),
     },
     {
-      label: 'Created At',
-      value: new Date(customer.createdAt).toLocaleString('en-US'),
+      label: 'Registered At',
+      value: new Date(customer.registeredAt).toLocaleString('en-US'),
     },
     {
       label: 'Updated At',
@@ -234,11 +235,20 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
             </dt>
             {customer.bankBookPath ? (
               bookUrl ? (
-                <img
-                  src={bookUrl}
-                  alt='Bank book'
-                  className='h-48 w-full max-w-xs rounded-lg border object-cover'
-                />
+                <button
+                  type='button'
+                  onClick={() => setLightboxOpen(true)}
+                  className='group relative block'
+                >
+                  <img
+                    src={bookUrl}
+                    alt='Bank book'
+                    className='h-48 w-full max-w-xs rounded-lg border object-cover transition group-hover:opacity-80'
+                  />
+                  <span className='absolute bottom-2 right-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white opacity-0 transition group-hover:opacity-100'>
+                    🔍 คลิกดูเต็ม
+                  </span>
+                </button>
               ) : (
                 <Skeleton className='h-48 w-full max-w-xs rounded-lg' />
               )
@@ -338,6 +348,26 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
             <Button onClick={doApprove} disabled={reviewing}>
               {reviewing ? <Loader2 className='animate-spin' /> : null}
               ✅ อนุมัติ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Bank book lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className='max-w-3xl'>
+          <DialogHeader>
+            <DialogTitle>รูปสมุดบัญชี — {customer.firstName} {customer.lastName}</DialogTitle>
+          </DialogHeader>
+          {bookUrl && (
+            <img
+              src={bookUrl}
+              alt='Bank book full size'
+              className='mx-auto max-h-[75vh] w-auto rounded-lg object-contain'
+            />
+          )}
+          <DialogFooter>
+            <Button variant='ghost' onClick={() => setLightboxOpen(false)}>
+              ปิด
             </Button>
           </DialogFooter>
         </DialogContent>

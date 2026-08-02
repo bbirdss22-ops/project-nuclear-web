@@ -46,10 +46,10 @@ export const customerColumns: ColumnDef<Customer>[] = [
     header: 'Status',
   },
   {
-    accessorKey: 'createdAt',
-    header: 'Created At',
+    accessorKey: 'registeredAt',
+    header: 'Registered At',
     cell: ({ row }) => {
-      const date = new Date(row.original.createdAt)
+      const date = new Date(row.original.registeredAt)
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',

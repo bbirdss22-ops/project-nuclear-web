@@ -83,7 +83,7 @@ export interface Customer {
   bankReviewedById?: string | null;
   bankReuploadToken?: string | null;
   bankReuploadTokenExpiresAt?: string | null;
-  createdAt: string;
+  registeredAt: string;
   updatedAt: string;
 }
 
