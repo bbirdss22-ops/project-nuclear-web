@@ -3,6 +3,28 @@ import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 const ACCESS_TOKEN = 'pn_access_token'
 
+// Decode JWT payload (base64url) → { sub, username, role } without a library
+function decodeJwtUser(token: string): User | null {
+  try {
+    const payload = token.split('.')[1]
+    if (!payload) return null
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    const data = JSON.parse(json)
+    if (data?.sub && data?.username && data?.role) {
+      return { id: data.sub, username: data.username, role: data.role }
+    }
+  } catch {
+    // invalid token — return null, caller handles it
+  }
+  return null
+}
+
 export interface User {
   id: string
   username: string
@@ -56,7 +78,8 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
   loadFromCookie: () => {
     const token = getCookie(ACCESS_TOKEN)
     if (token) {
-      set({ accessToken: token, isAuthenticated: true })
+      const user = decodeJwtUser(token)
+      set({ accessToken: token, user, isAuthenticated: true })
     }
   },
 

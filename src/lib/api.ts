@@ -224,4 +224,49 @@ export async function changePassword(currentPassword: string, newPassword: strin
   return response.data
 }
 
+// ─── Admin Users (Superadmin only) ─────────────────────
+
+export interface AdminUser {
+  id: string
+  username: string
+  role: string
+  createdAt: string
+}
+
+export interface CreateUserRequest {
+  username: string
+  password: string
+  role: 'admin' | 'superadmin'
+}
+
+export async function getUsers(
+  page = 1,
+  pageSize = 20,
+  q?: string,
+): Promise<PaginatedResponse<AdminUser>> {
+  const res = await api.get<PaginatedResponse<AdminUser>>('/api/users', {
+    params: { page, pageSize, ...(q ? { q } : {}) },
+  })
+  return res.data
+}
+
+export async function createUser(
+  data: CreateUserRequest,
+): Promise<AdminUser> {
+  const res = await api.post<AdminUser>('/api/users', data)
+  return res.data
+}
+
+export async function updateUser(
+  id: string,
+  data: Partial<{ username: string; role: string; password: string }>,
+): Promise<AdminUser> {
+  const res = await api.patch<AdminUser>(`/api/users/${id}`, data)
+  return res.data
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  await api.delete(`/api/users/${id}`)
+}
+
 export default api;

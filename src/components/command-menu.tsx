@@ -12,13 +12,16 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { sidebarData } from './layout/data/sidebar-data'
+import { getSidebarData } from './layout/data/sidebar-data'
 import { ScrollArea } from './ui/scroll-area'
+import { useAuthStore } from '@/stores/auth-store'
 
 export function CommandMenu() {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
+  const role = useAuthStore((s) => s.user?.role)
+  const sidebarData = getSidebarData(role)
 
   const runCommand = React.useCallback(
     (command: () => unknown) => {

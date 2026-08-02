@@ -30,7 +30,8 @@ export function setCookie(
 ): void {
   if (typeof document === 'undefined') return
 
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`
+  const secure = import.meta.env.PROD ? '; Secure' : ''
+  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`
 }
 
 /**
@@ -39,5 +40,5 @@ export function setCookie(
 export function removeCookie(name: string): void {
   if (typeof document === 'undefined') return
 
-  document.cookie = `${name}=; path=/; max-age=0`
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`
 }

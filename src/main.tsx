@@ -94,6 +94,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// Restore auth state from cookie BEFORE first render —
+// prevents the 401 interceptor from wiping the cookie after a page refresh
+useAuthStore.getState().loadFromCookie()
+
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
