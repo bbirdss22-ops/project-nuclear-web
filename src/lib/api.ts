@@ -3,17 +3,20 @@ import { useAuthStore } from '@/stores/auth-store';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  headers: { 'Content-Type': 'application/json' },
-});
+})
 
-// Inject JWT token into every request
+// Request interceptor: inject JWT and let axios auto-set Content-Type
+// (FormData payloads get multipart/form-data + boundary automatically).
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = useAuthStore.getState().auth.accessToken;
+  const token = useAuthStore.getState().auth.accessToken
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`
   }
-  return config;
-});
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
+  return config
+})
 
 // Handle 401 — auto logout
 api.interceptors.response.use(
@@ -73,8 +76,32 @@ export interface Customer {
   bankName?: string | null;
   bankAccountName?: string | null;
   bankAccountNumber?: string | null;
+  bankBookPath?: string | null;
+  bankStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  bankRejectReason?: string | null;
+  bankReviewedAt?: string | null;
+  bankReviewedById?: string | null;
+  bankReuploadToken?: string | null;
+  bankReuploadTokenExpiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BankReviewResult {
+  customer: Customer;
+  linePushSent: boolean;
+}
+
+export interface ReuploadValidationResult {
+  valid: boolean;
+  message?: string;
+  customer?: {
+    id: string;
+    bankName?: string | null;
+    bankAccountName?: string | null;
+    bankRejectReason?: string | null;
+    bankStatus?: string;
+  };
 }
 
 export interface PaginatedResponse<T> {
@@ -104,9 +131,9 @@ export async function createCustomer(data: CreateCustomerRequest): Promise<Custo
   return res.data;
 }
 
-export async function getCustomers(page = 1, pageSize = 20): Promise<PaginatedResponse<Customer>> {
+export async function getCustomers(page = 1, pageSize = 20, bankStatus?: string): Promise<PaginatedResponse<Customer>> {
   const res = await api.get<PaginatedResponse<Customer>>('/api/customers', {
-    params: { page, pageSize },
+    params: { page, pageSize, ...(bankStatus ? { bankStatus } : {}) },
   });
   return res.data;
 }
@@ -131,6 +158,47 @@ export async function getCustomerByLineUserId(lineUserId: string): Promise<Custo
 export async function updateCustomer(id: string, data: Partial<CreateCustomerRequest>): Promise<Customer> {
   const res = await api.patch<Customer>(`/api/customers/${id}`, data);
   return res.data;
+}
+
+// ─── Bank Book (Validation Workflow) ───────────────────
+
+export async function uploadBankBook(customerId: string, file: File): Promise<Customer> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await api.post<Customer>(`/api/customers/${customerId}/bank-book`, formData)
+  return res.data
+}
+
+export async function getBankBookUrl(customerId: string): Promise<{ url: string }> {
+  const res = await api.get<{ url: string }>(`/api/customers/${customerId}/bank-book-url`)
+  return res.data
+}
+
+export async function reviewCustomerBank(
+  customerId: string,
+  action: 'approve' | 'reject',
+  reason?: string,
+): Promise<BankReviewResult> {
+  const res = await api.post<BankReviewResult>(`/api/customers/${customerId}/bank-review`, {
+    action,
+    ...(action === 'reject' ? { reason } : {}),
+  })
+  return res.data
+}
+
+export async function validateReuploadToken(token: string): Promise<ReuploadValidationResult> {
+  const res = await api.get<ReuploadValidationResult>('/api/bank-reupload/validate', {
+    params: { token },
+  })
+  return res.data
+}
+
+export async function reuploadBankBook(token: string, file: File): Promise<Customer> {
+  const formData = new FormData()
+  formData.append('token', token)
+  formData.append('file', file)
+  const res = await api.post<Customer>('/api/bank-reupload', formData)
+  return res.data
 }
 
 // ─── Registration Token ────────────────────────────────

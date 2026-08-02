@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as BankReuploadRouteImport } from './routes/bank-reupload'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
@@ -40,6 +41,11 @@ import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authentic
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankReuploadRoute = BankReuploadRouteImport.update({
+  id: '/bank-reupload',
+  path: '/bank-reupload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -191,6 +197,7 @@ const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/bank-reupload': typeof BankReuploadRoute
   '/register': typeof RegisterRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/users/': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/bank-reupload': typeof BankReuploadRoute
   '/register': typeof RegisterRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -249,6 +257,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/bank-reupload': typeof BankReuploadRoute
   '/register': typeof RegisterRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bank-reupload'
     | '/register'
     | '/settings'
     | '/forgot-password'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/bank-reupload'
     | '/register'
     | '/forgot-password'
     | '/otp'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/bank-reupload'
     | '/register'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
@@ -369,6 +381,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  BankReuploadRoute: typeof BankReuploadRoute
   RegisterRoute: typeof RegisterRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
@@ -389,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-reupload': {
+      id: '/bank-reupload'
+      path: '/bank-reupload'
+      fullPath: '/bank-reupload'
+      preLoaderRoute: typeof BankReuploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -639,6 +659,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  BankReuploadRoute: BankReuploadRoute,
   RegisterRoute: RegisterRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,

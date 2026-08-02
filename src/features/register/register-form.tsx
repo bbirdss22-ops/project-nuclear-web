@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createCustomer, consumeRegistrationToken } from '@/lib/api'
+import { createCustomer, consumeRegistrationToken, uploadBankBook } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -121,6 +121,7 @@ export function RegisterSuccess({
 
 export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: RegisterFormProps & { onSuccess?: (code: string) => void }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [bankBookFile, setBankBookFile] = useState<File | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -152,6 +153,18 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         bankAccountName: data.bankAccountName || undefined,
         bankAccountNumber: data.bankAccountNumber || undefined,
       })
+
+      // Upload bank book image (optional — non-blocking)
+      if (bankBookFile && customer?.id) {
+        try {
+          await uploadBankBook(customer.id, bankBookFile)
+        } catch (bankErr: any) {
+          const bankMsg =
+            bankErr?.response?.data?.message ||
+            'อัปโหลดรูปสมุดบัญชีไม่สำเร็จ — กรุณาอัปโหลดใหม่ภายหลังได้'
+          toast.warning(bankMsg)
+        }
+      }
 
       // Consume registration token if present
       if (token && customer?.id) {
@@ -321,6 +334,27 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className='mt-3'>
+            <FormLabel>อัปโหลดรูปสมุดบัญชี (ไม่บังคับ)</FormLabel>
+            <p className='mb-2 mt-0.5 text-xs text-muted-foreground'>
+              ใช้ตรวจสอบบัญชีสำหรับรับค่าคอมมิชชั่น (รูป jpeg/png/webp ไม่เกิน 5MB)
+            </p>
+            <FormControl>
+              <Input
+                type='file'
+                accept='image/jpeg,image/png,image/webp'
+                onChange={(e) =>
+                  setBankBookFile(e.target.files?.[0] ?? null)
+                }
+              />
+            </FormControl>
+            {bankBookFile && (
+              <p className='mt-1 truncate text-xs text-muted-foreground'>
+                📎 {bankBookFile.name}
+              </p>
+            )}
           </div>
         </div>
 

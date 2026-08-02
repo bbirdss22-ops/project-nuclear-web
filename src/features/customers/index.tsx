@@ -35,17 +35,22 @@ export function Customers() {
   const [pageSize, setPageSize] = useState(20)
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounce(searchQuery, 300)
+  const [bankFilter, setBankFilter] = useState<string>('all')
 
   const isSearching = debouncedSearch.trim().length > 0
 
   const { data, isLoading, error } = useQuery({
     queryKey: isSearching
       ? ['customers', 'search', debouncedSearch, page, pageSize]
-      : ['customers', page, pageSize],
+      : ['customers', page, pageSize, bankFilter],
     queryFn: () =>
       isSearching
         ? searchCustomers(debouncedSearch.trim(), page, pageSize)
-        : getCustomers(page, pageSize),
+        : getCustomers(
+            page,
+            pageSize,
+            bankFilter === 'all' ? undefined : bankFilter,
+          ),
   })
 
   const columns = useMemo(() => customerColumns, [])
@@ -67,18 +72,37 @@ export function Customers() {
         <h1 className='text-2xl font-bold tracking-tight'>Customers</h1>
       </div>
 
-      {/* Search */}
-      <div className='relative w-full max-w-sm mb-4'>
-        <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-        <Input
-          placeholder='Search customers...'
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value)
+      {/* Search + filter */}
+      <div className='mb-4 flex flex-wrap items-center gap-2'>
+        <div className='relative w-full max-w-sm'>
+          <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+          <Input
+            placeholder='Search customers...'
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setPage(1)
+            }}
+            className='pl-10'
+          />
+        </div>
+        <Select
+          value={bankFilter}
+          onValueChange={(value) => {
+            setBankFilter(value)
             setPage(1)
           }}
-          className='pl-10'
-        />
+        >
+          <SelectTrigger className='h-9 w-44'>
+            <SelectValue placeholder='Bank status' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>ทั้งหมด</SelectItem>
+            <SelectItem value='pending'>รอตรวจสอบ</SelectItem>
+            <SelectItem value='approved'>ผ่าน</SelectItem>
+            <SelectItem value='rejected'>ไม่ผ่าน</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
