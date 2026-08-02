@@ -17,6 +17,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Card,
   CardContent,
   CardDescription,
@@ -33,6 +40,13 @@ const formSchema = z.object({
     .max(10, 'เบอร์โทรไม่ถูกต้อง'),
   email: z.string().email('อีเมลไม่ถูกต้อง').optional().or(z.literal('')),
   address: z.string().optional(),
+  bankName: z.string().optional(),
+  bankAccountName: z.string().optional(),
+  bankAccountNumber: z
+    .string()
+    .regex(/^[0-9]{9,13}$/, 'เลขบัญชีต้องเป็นตัวเลข 9-13 หลัก')
+    .optional()
+    .or(z.literal('')),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -116,6 +130,9 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
       phone: '',
       email: '',
       address: '',
+      bankName: '',
+      bankAccountName: '',
+      bankAccountNumber: '',
     },
   })
 
@@ -131,6 +148,9 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         address: data.address || undefined,
         lineUserId: lineUserId || undefined,
         referrerId: referrerId || undefined,
+        bankName: data.bankName || undefined,
+        bankAccountName: data.bankAccountName || undefined,
+        bankAccountNumber: data.bankAccountNumber || undefined,
       })
 
       // Consume registration token if present
@@ -229,6 +249,80 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
             </FormItem>
           )}
         />
+
+        <div className='mt-2 rounded-lg border bg-muted/30 p-4'>
+          <h3 className='text-sm font-semibold text-foreground'>
+            ข้อมูลบัญชีธนาคาร
+          </h3>
+          <p className='mb-3 mt-0.5 text-xs text-muted-foreground'>
+            (สำหรับรับค่าคอมมิชชั่น — กรอกทีหลังได้)
+          </p>
+          <div className='grid gap-3'>
+            <FormField
+              control={form.control}
+              name='bankName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ธนาคาร</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className='w-full'>
+                        <SelectValue placeholder='เลือกธนาคาร' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='KBANK'>กสิกรไทย</SelectItem>
+                      <SelectItem value='KTB'>กรุงไทย</SelectItem>
+                      <SelectItem value='BBL'>กรุงเทพ</SelectItem>
+                      <SelectItem value='SCB'>ไทยพาณิชย์</SelectItem>
+                      <SelectItem value='BAY'>กรุงศรีอยุธยา</SelectItem>
+                      <SelectItem value='TTB'>ทหารไทยธนชาต</SelectItem>
+                      <SelectItem value='GSB'>ออมสิน</SelectItem>
+                      <SelectItem value='BAAC'>ธ.ก.ส.</SelectItem>
+                      <SelectItem value='OTHER'>อื่นๆ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='bankAccountName'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ชื่อบัญชี</FormLabel>
+                  <FormControl>
+                    <Input placeholder='สมชาย ใจดี' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='bankAccountNumber'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>เลขบัญชี</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='1234567890'
+                      inputMode='numeric'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <Button className='w-full mt-2' size='lg' disabled={isLoading}>
           {isLoading ? (

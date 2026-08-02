@@ -53,6 +53,9 @@ export interface CreateCustomerRequest {
   lineUserId?: string;
   address?: string;
   referrerId?: string;
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 export interface Customer {
@@ -67,6 +70,9 @@ export interface Customer {
   address: string | null;
   status: string;
   referrerId: string | null;
+  bankName?: string | null;
+  bankAccountName?: string | null;
+  bankAccountNumber?: string | null;
   createdAt: string;
   updatedAt: string;
 }
