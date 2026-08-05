@@ -1,7 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Send } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { Customer } from '@/lib/api'
 
 function BankStatusBadge({ status }: { status?: Customer['bankStatus'] }) {
@@ -20,12 +20,19 @@ function BankStatusBadge({ status }: { status?: Customer['bankStatus'] }) {
 export interface CustomerRowActions {
   onEdit: (customer: Customer) => void
   onDelete: (customer: Customer) => void
-  onSendReupload: (customer: Customer) => void
 }
 
 export const customerColumns: (
   actions: CustomerRowActions,
 ) => ColumnDef<Customer>[] = (actions) => [
+  {
+    accessorKey: 'code',
+    header: 'รหัสลูกค้า',
+    cell: ({ row }) => {
+      const code = row.original.code
+      return code ?? '-'
+    },
+  },
   {
     accessorKey: 'firstName',
     header: 'First Name',
@@ -84,14 +91,6 @@ export const customerColumns: (
             onClick={() => actions.onEdit(customer)}
           >
             <Pencil className='h-4 w-4' />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            title='ส่งลิงก์อัปโหลดสมุดบัญชี'
-            onClick={() => actions.onSendReupload(customer)}
-          >
-            <Send className='h-4 w-4' />
           </Button>
           <Button
             variant='ghost'

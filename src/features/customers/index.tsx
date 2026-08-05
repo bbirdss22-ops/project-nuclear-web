@@ -13,7 +13,6 @@ import {
   getCustomers,
   searchCustomers,
   deleteCustomer,
-  sendBankReupload,
   type Customer,
 } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -73,9 +72,7 @@ export function Customers() {
 
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null)
-  const [sendingCustomer, setSendingCustomer] = useState<Customer | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const [sending, setSending] = useState(false)
 
   const handleDelete = async () => {
     if (!deletingCustomer) return
@@ -93,31 +90,11 @@ export function Customers() {
     }
   }
 
-  const handleSendReupload = async () => {
-    if (!sendingCustomer) return
-    setSending(true)
-    try {
-      const result = await sendBankReupload(sendingCustomer.id)
-      if (result.sent) {
-        toast.success(result.message || 'ส่งลิงก์อัปโหลดใหม่แล้ว')
-      } else {
-        toast.warning(result.message || 'ลูกค้าไม่มี Line ID')
-      }
-    } catch (err) {
-      const e = err as { response?: { data?: { message?: string } } }
-      toast.error(e?.response?.data?.message || 'ส่งลิงก์ไม่สำเร็จ')
-    } finally {
-      setSending(false)
-      setSendingCustomer(null)
-    }
-  }
-
   const columns = useMemo(
     () =>
       customerColumns({
         onEdit: (c) => setEditingCustomer(c),
         onDelete: (c) => setDeletingCustomer(c),
-        onSendReupload: (c) => setSendingCustomer(c),
       }),
     [],
   )
@@ -332,40 +309,6 @@ export function Customers() {
                 <Loader2 className='h-4 w-4 animate-spin' />
               ) : null}
               ลบ
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Send re-upload link confirm */}
-      <AlertDialog
-        open={!!sendingCustomer}
-        onOpenChange={(open) => {
-          if (!open) setSendingCustomer(null)
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>ส่งลิงก์อัปโหลดสมุดบัญชี</AlertDialogTitle>
-            <AlertDialogDescription>
-              ต้องการส่งลิงก์อัปโหลดสมุดบัญชีใหม่ไปยังลูกค้า "
-              {sendingCustomer?.firstName} {sendingCustomer?.lastName}" ผ่าน LINE
-              หรือไม่? (ลิงก์มีอายุ 7 วัน)
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={sending}>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault()
-                handleSendReupload()
-              }}
-              disabled={sending}
-            >
-              {sending ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : null}
-              ส่ง
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

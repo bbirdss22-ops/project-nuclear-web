@@ -7,6 +7,7 @@ import {
   getCustomerById,
   getBankBookUrl,
   reviewCustomerBank,
+  sendBankReupload,
   type Customer,
 } from '@/lib/api'
 import { Badge } from '@/components/ui/badge'
@@ -33,6 +34,16 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface CustomerDetailProps {
   customerId: string
@@ -60,6 +71,8 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
   const [reviewing, setReviewing] = useState(false)
   const [confirmApprove, setConfirmApprove] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [confirmSendReupload, setConfirmSendReupload] = useState(false)
+  const [sendingReupload, setSendingReupload] = useState(false)
 
   const { data: customer, isLoading, error } = useQuery({
     queryKey: ['customer', customerId],
@@ -99,6 +112,23 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
       toast.error(err?.response?.data?.message || 'อนุมัติไม่สำเร็จ')
     } finally {
       setReviewing(false)
+    }
+  }
+
+  async function doSendReupload() {
+    setSendingReupload(true)
+    try {
+      const result = await sendBankReupload(customerId)
+      if (result.sent) {
+        toast.success(result.message || 'ส่งลิงก์อัปโหลดใหม่แล้ว')
+      } else {
+        toast.warning(result.message || 'ลูกค้าไม่มี Line ID')
+      }
+      setConfirmSendReupload(false)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'ส่งลิงก์ไม่สำเร็จ')
+    } finally {
+      setSendingReupload(false)
     }
   }
 
@@ -273,7 +303,7 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
           )}
 
           {customer.bankStatus === 'pending' && (
-            <div className='flex gap-3'>
+            <div className='flex flex-wrap gap-3'>
               <Button
                 variant='default'
                 onClick={() => setConfirmApprove(true)}
@@ -290,6 +320,16 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
               </Button>
             </div>
           )}
+
+          <div>
+            <Button
+              variant='outline'
+              onClick={() => setConfirmSendReupload(true)}
+              disabled={sendingReupload}
+            >
+              ส่งลิงก์อัปโหลดสมุดบัญชี
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -352,6 +392,40 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Send re-upload link confirm */}
+      <AlertDialog
+        open={confirmSendReupload}
+        onOpenChange={setConfirmSendReupload}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ส่งลิงก์อัปโหลดสมุดบัญชี</AlertDialogTitle>
+            <AlertDialogDescription>
+              ต้องการส่งลิงก์อัปโหลดสมุดบัญชีใหม่ไปยังลูกค้า "
+              {customer.firstName} {customer.lastName}" ผ่าน LINE หรือไม่?
+              (ลิงก์มีอายุ 7 วัน)
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendingReupload}>
+              ยกเลิก
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                doSendReupload()
+              }}
+              disabled={sendingReupload}
+            >
+              {sendingReupload ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
+              ส่ง
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Bank book lightbox */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogContent className='max-w-3xl'>
