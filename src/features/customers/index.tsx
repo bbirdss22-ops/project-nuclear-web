@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   flexRender,
   getCoreRowModel,
@@ -8,7 +9,13 @@ import {
 } from '@tanstack/react-table'
 import { Loader2, SearchIcon } from 'lucide-react'
 import { useDebounce } from '@/hooks/use-debounce'
-import { getCustomers, searchCustomers } from '@/lib/api'
+import {
+  getCustomers,
+  searchCustomers,
+  deleteCustomer,
+  sendBankReupload,
+  type Customer,
+} from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -26,8 +33,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Main } from '@/components/layout/main'
 import { customerColumns } from './customer-columns'
+import { EditCustomerDialog } from './edit-customer-dialog'
 
 export function Customers() {
   const navigate = useNavigate()
@@ -39,7 +57,7 @@ export function Customers() {
 
   const isSearching = debouncedSearch.trim().length > 0
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: isSearching
       ? ['customers', 'search', debouncedSearch, page, pageSize]
       : ['customers', page, pageSize, bankFilter],
@@ -53,7 +71,56 @@ export function Customers() {
           ),
   })
 
-  const columns = useMemo(() => customerColumns, [])
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null)
+  const [sendingCustomer, setSendingCustomer] = useState<Customer | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deletingCustomer) return
+    setDeleting(true)
+    try {
+      await deleteCustomer(deletingCustomer.id)
+      toast.success('ลบลูกค้าแล้ว')
+      setDeletingCustomer(null)
+      refetch()
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } }
+      toast.error(e?.response?.data?.message || 'ลบไม่สำเร็จ')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleSendReupload = async () => {
+    if (!sendingCustomer) return
+    setSending(true)
+    try {
+      const result = await sendBankReupload(sendingCustomer.id)
+      if (result.sent) {
+        toast.success(result.message || 'ส่งลิงก์อัปโหลดใหม่แล้ว')
+      } else {
+        toast.warning(result.message || 'ลูกค้าไม่มี Line ID')
+      }
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } }
+      toast.error(e?.response?.data?.message || 'ส่งลิงก์ไม่สำเร็จ')
+    } finally {
+      setSending(false)
+      setSendingCustomer(null)
+    }
+  }
+
+  const columns = useMemo(
+    () =>
+      customerColumns({
+        onEdit: (c) => setEditingCustomer(c),
+        onDelete: (c) => setDeletingCustomer(c),
+        onSendReupload: (c) => setSendingCustomer(c),
+      }),
+    [],
+  )
 
   const table = useReactTable({
     data: data?.data ?? [],
@@ -226,6 +293,83 @@ export function Customers() {
           </div>
         </div>
       )}
+
+      {/* Edit dialog */}
+      <EditCustomerDialog
+        customer={editingCustomer}
+        onOpenChange={(open) => {
+          if (!open) setEditingCustomer(null)
+        }}
+        onSaved={refetch}
+      />
+
+      {/* Delete confirm */}
+      <AlertDialog
+        open={!!deletingCustomer}
+        onOpenChange={(open) => {
+          if (!open) setDeletingCustomer(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ยืนยันการลบลูกค้า</AlertDialogTitle>
+            <AlertDialogDescription>
+              คุณต้องการลบลูกค้า "{deletingCustomer?.firstName}{' '}
+              {deletingCustomer?.lastName}" หรือไม่? การลบนี้จะไม่สามารถยกเลิกได้
+              (ลูกค้าจะถูกทำเครื่องหมายเป็นลบ และจะไม่แสดงในรายการ)
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleDelete()
+              }}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
+              ลบ
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Send re-upload link confirm */}
+      <AlertDialog
+        open={!!sendingCustomer}
+        onOpenChange={(open) => {
+          if (!open) setSendingCustomer(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ส่งลิงก์อัปโหลดสมุดบัญชี</AlertDialogTitle>
+            <AlertDialogDescription>
+              ต้องการส่งลิงก์อัปโหลดสมุดบัญชีใหม่ไปยังลูกค้า "
+              {sendingCustomer?.firstName} {sendingCustomer?.lastName}" ผ่าน LINE
+              หรือไม่? (ลิงก์มีอายุ 7 วัน)
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sending}>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleSendReupload()
+              }}
+              disabled={sending}
+            >
+              {sending ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : null}
+              ส่ง
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Main>
   )
 }

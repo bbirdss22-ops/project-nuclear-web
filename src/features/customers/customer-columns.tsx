@@ -1,5 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Pencil, Trash2, Send } from 'lucide-react'
 import type { Customer } from '@/lib/api'
 
 function BankStatusBadge({ status }: { status?: Customer['bankStatus'] }) {
@@ -15,7 +17,15 @@ function BankStatusBadge({ status }: { status?: Customer['bankStatus'] }) {
   }
 }
 
-export const customerColumns: ColumnDef<Customer>[] = [
+export interface CustomerRowActions {
+  onEdit: (customer: Customer) => void
+  onDelete: (customer: Customer) => void
+  onSendReupload: (customer: Customer) => void
+}
+
+export const customerColumns: (
+  actions: CustomerRowActions,
+) => ColumnDef<Customer>[] = (actions) => [
   {
     accessorKey: 'firstName',
     header: 'First Name',
@@ -55,6 +65,45 @@ export const customerColumns: ColumnDef<Customer>[] = [
         month: 'short',
         day: 'numeric',
       })
+    },
+  },
+  {
+    id: 'actions',
+    header: 'จัดการ',
+    cell: ({ row }) => {
+      const customer = row.original
+      return (
+        <div
+          className='flex items-center gap-1'
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Button
+            variant='ghost'
+            size='icon'
+            title='แก้ไข'
+            onClick={() => actions.onEdit(customer)}
+          >
+            <Pencil className='h-4 w-4' />
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon'
+            title='ส่งลิงก์อัปโหลดสมุดบัญชี'
+            onClick={() => actions.onSendReupload(customer)}
+          >
+            <Send className='h-4 w-4' />
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon'
+            title='ลบ'
+            className='text-destructive hover:text-destructive'
+            onClick={() => actions.onDelete(customer)}
+          >
+            <Trash2 className='h-4 w-4' />
+          </Button>
+        </div>
+      )
     },
   },
 ]

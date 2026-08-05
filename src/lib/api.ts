@@ -117,6 +117,21 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export type RegistrationPeriod = 'daily' | 'monthly' | 'yearly'
+
+export interface RegistrationStats {
+  period: RegistrationPeriod
+  from: string
+  to: string
+  total: number
+  data: { key: string; count: number }[]
+}
+
+export interface BankReuploadSendResult {
+  sent: boolean
+  message: string
+}
+
 // ─── Auth ───────────────────────────────────────────────
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
@@ -157,6 +172,27 @@ export async function getCustomerByLineUserId(lineUserId: string): Promise<Custo
 
 export async function updateCustomer(id: string, data: Partial<CreateCustomerRequest>): Promise<Customer> {
   const res = await api.patch<Customer>(`/api/customers/${id}`, data);
+  return res.data;
+}
+
+export async function deleteCustomer(id: string): Promise<Customer> {
+  const res = await api.delete<Customer>(`/api/customers/${id}`);
+  return res.data;
+}
+
+export async function sendBankReupload(id: string): Promise<BankReuploadSendResult> {
+  const res = await api.post<BankReuploadSendResult>(`/api/customers/${id}/bank-reupload-send`);
+  return res.data;
+}
+
+export async function getRegistrationStats(
+  period: RegistrationPeriod = 'daily',
+  from?: string,
+  to?: string,
+): Promise<RegistrationStats> {
+  const res = await api.get<RegistrationStats>('/api/customers/stats/registrations', {
+    params: { period, ...(from ? { from } : {}), ...(to ? { to } : {}) },
+  });
   return res.data;
 }
 
