@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 type Theme = 'dark' | 'light' | 'system'
@@ -42,38 +42,25 @@ export function ThemeProvider({
     () => (getCookie(storageKey) as Theme) || defaultTheme
   )
 
-  // Optimized: Memoize the resolved theme calculation to prevent unnecessary re-computations
-  const resolvedTheme = useMemo((): ResolvedTheme => {
-    if (theme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-    }
-    return theme as ResolvedTheme
-  }, [theme])
+  // TEMPORARY: dark mode disabled — always resolve to light, regardless of
+  // system preference or saved cookie. To re-enable dark mode, revert this to
+  // the original implementation (see git diff / commit history).
+  const resolvedTheme: ResolvedTheme = 'light'
+  // const resolvedTheme = useMemo((): ResolvedTheme => {
+  //   if (theme === 'system') {
+  //     return window.matchMedia('(prefers-color-scheme: dark)').matches
+  //       ? 'dark'
+  //       : 'light'
+  //   }
+  //   return theme as ResolvedTheme
+  // }, [theme])
 
   useEffect(() => {
     const root = window.document.documentElement
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const applyTheme = (currentResolvedTheme: ResolvedTheme) => {
-      root.classList.remove('light', 'dark') // Remove existing theme classes
-      root.classList.add(currentResolvedTheme) // Add the new theme class
-    }
-
-    const handleChange = () => {
-      if (theme === 'system') {
-        const systemTheme = mediaQuery.matches ? 'dark' : 'light'
-        applyTheme(systemTheme)
-      }
-    }
-
-    applyTheme(resolvedTheme)
-
-    mediaQuery.addEventListener('change', handleChange)
-
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme, resolvedTheme])
+    // TEMPORARY: dark mode disabled — always apply the light class only.
+    root.classList.remove('dark') // In case a stale 'dark' class is on <html>
+    root.classList.add('light')
+  }, [])
 
   const setTheme = (theme: Theme) => {
     setCookie(storageKey, theme, THEME_COOKIE_MAX_AGE)
