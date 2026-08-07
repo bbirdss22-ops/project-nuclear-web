@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -183,7 +184,16 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง'
-      toast.error(msg)
+
+      // 409 = เบอร์โทรซ้ำ — แสดง error ที่ field phone แทน toast อย่างเดียว
+      if (error?.response?.status === 409) {
+        form.setError('phone', {
+          type: 'manual',
+          message: error?.response?.data?.message || 'เบอร์โทรนี้ถูกใช้แล้ว',
+        })
+      } else {
+        toast.error(msg)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -258,6 +268,9 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
               <FormControl>
                 <Input placeholder='123 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110' {...field} />
               </FormControl>
+              <FormDescription>
+                ที่อยู่และเบอร์โทรนี้จะใช้ในการจัดส่งสินค้า
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
