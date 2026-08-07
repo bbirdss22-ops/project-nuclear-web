@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { BANKS } from '@/data/banks'
 import {
   Card,
   CardContent,
@@ -41,6 +43,7 @@ const formSchema = z.object({
     .max(10, 'เบอร์โทรไม่ถูกต้อง'),
   email: z.string().email('อีเมลไม่ถูกต้อง').optional().or(z.literal('')),
   address: z.string().optional(),
+  plants: z.string().optional(),
   bankName: z.string().optional(),
   bankAccountName: z.string().optional(),
   bankAccountNumber: z
@@ -132,6 +135,7 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
       phone: '',
       email: '',
       address: '',
+      plants: '',
       bankName: '',
       bankAccountName: '',
       bankAccountNumber: '',
@@ -148,6 +152,7 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         phone: data.phone,
         email: data.email || undefined,
         address: data.address || undefined,
+        plants: data.plants || undefined,
         lineUserId: lineUserId || undefined,
         referrerId: referrerId || undefined,
         bankName: data.bankName || undefined,
@@ -276,6 +281,24 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
           )}
         />
 
+        <FormField
+          control={form.control}
+          name='plants'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>พืชที่ปลูก</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='ข้าว, มะม่วง, ผักสวนครัว'
+                  className='resize-none'
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className='mt-2 rounded-lg border bg-muted/30 p-4'>
           <h3 className='text-sm font-semibold text-foreground'>
             ข้อมูลบัญชีธนาคาร
@@ -300,15 +323,11 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='KBANK'>กสิกรไทย</SelectItem>
-                      <SelectItem value='KTB'>กรุงไทย</SelectItem>
-                      <SelectItem value='BBL'>กรุงเทพ</SelectItem>
-                      <SelectItem value='SCB'>ไทยพาณิชย์</SelectItem>
-                      <SelectItem value='BAY'>กรุงศรีอยุธยา</SelectItem>
-                      <SelectItem value='TTB'>ทหารไทยธนชาต</SelectItem>
-                      <SelectItem value='GSB'>ออมสิน</SelectItem>
-                      <SelectItem value='BAAC'>ธ.ก.ส.</SelectItem>
-                      <SelectItem value='OTHER'>อื่นๆ</SelectItem>
+                      {BANKS.map((bank) => (
+                        <SelectItem key={bank.value} value={bank.value}>
+                          {bank.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
