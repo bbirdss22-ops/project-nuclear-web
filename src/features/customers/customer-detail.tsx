@@ -181,6 +181,9 @@ export function CustomerDetail({ customerId }: CustomerDetailProps) {
     { label: 'Phone', value: customer.phone },
     { label: 'Email', value: customer.email ?? '—' },
     { label: 'Address', value: customer.address ?? '—' },
+    ...(customer.plants
+      ? [{ label: 'พืชที่ปลูก', value: customer.plants }]
+      : []),
     { label: 'Line User ID', value: customer.lineUserId ?? '—' },
     {
       label: 'Status',
