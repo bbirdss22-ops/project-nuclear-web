@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createCustomer, consumeRegistrationToken, uploadBankBook } from '@/lib/api'
+import { createCustomer, consumeRegistrationToken } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -17,15 +17,15 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { BANKS } from '@/data/banks'
+// import { BANKS } from '@/data/banks'
 import {
   Card,
   CardContent,
@@ -44,13 +44,13 @@ const formSchema = z.object({
   email: z.string().email('อีเมลไม่ถูกต้อง').optional().or(z.literal('')),
   address: z.string().optional(),
   plants: z.string().optional(),
-  bankName: z.string().optional(),
-  bankAccountName: z.string().optional(),
-  bankAccountNumber: z
-    .string()
-    .regex(/^[0-9]{9,13}$/, 'เลขบัญชีต้องเป็นตัวเลข 9-13 หลัก')
-    .optional()
-    .or(z.literal('')),
+  // bankName: z.string().optional(),
+  // bankAccountName: z.string().optional(),
+  // bankAccountNumber: z
+  //   .string()
+  //   .regex(/^[0-9]{9,13}$/, 'เลขบัญชีต้องเป็นตัวเลข 9-13 หลัก')
+  //   .optional()
+  //   .or(z.literal('')),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -125,7 +125,7 @@ export function RegisterSuccess({
 
 export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: RegisterFormProps & { onSuccess?: (code: string) => void }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [bankBookFile, setBankBookFile] = useState<File | null>(null)
+  // const [bankBookFile, setBankBookFile] = useState<File | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -136,9 +136,9 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
       email: '',
       address: '',
       plants: '',
-      bankName: '',
-      bankAccountName: '',
-      bankAccountNumber: '',
+      // bankName: '',
+      // bankAccountName: '',
+      // bankAccountNumber: '',
     },
   })
 
@@ -155,22 +155,23 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         plants: data.plants || undefined,
         lineUserId: lineUserId || undefined,
         referrerId: referrerId || undefined,
-        bankName: data.bankName || undefined,
-        bankAccountName: data.bankAccountName || undefined,
-        bankAccountNumber: data.bankAccountNumber || undefined,
+        // bankName: data.bankName || undefined,
+        // bankAccountName: data.bankAccountName || undefined,
+        // bankAccountNumber: data.bankAccountNumber || undefined,
       })
 
+      // [TEMPORARILY DISABLED] Bank account section hidden during registration.
       // Upload bank book image (optional — non-blocking)
-      if (bankBookFile && customer?.id) {
-        try {
-          await uploadBankBook(customer.id, bankBookFile)
-        } catch (bankErr: any) {
-          const bankMsg =
-            bankErr?.response?.data?.message ||
-            'อัปโหลดรูปสมุดบัญชีไม่สำเร็จ — กรุณาอัปโหลดใหม่ภายหลังได้'
-          toast.warning(bankMsg)
-        }
-      }
+      // if (bankBookFile && customer?.id) {
+      //   try {
+      //     await uploadBankBook(customer.id, bankBookFile)
+      //   } catch (bankErr: any) {
+      //     const bankMsg =
+      //       bankErr?.response?.data?.message ||
+      //       'อัปโหลดรูปสมุดบัญชีไม่สำเร็จ — กรุณาอัปโหลดใหม่ภายหลังได้'
+      //     toast.warning(bankMsg)
+      //   }
+      // }
 
       // Consume registration token if present
       if (token && customer?.id) {
@@ -299,6 +300,7 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
           )}
         />
 
+        {/* [TEMPORARILY HIDDEN] Bank account section — remove/restore after launch.
         <div className='mt-2 rounded-lg border bg-muted/30 p-4'>
           <h3 className='text-sm font-semibold text-foreground'>
             ข้อมูลบัญชีธนาคาร
@@ -389,6 +391,7 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
             )}
           </div>
         </div>
+        */}
 
         <Button className='w-full mt-2' size='lg' disabled={isLoading}>
           {isLoading ? (
