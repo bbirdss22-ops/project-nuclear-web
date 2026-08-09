@@ -84,15 +84,43 @@ export function RegisterSuccess({
     <Card className='max-w-2xl mx-auto'>
       <CardHeader>
         <CardTitle className='text-center text-2xl'>🎉 สมัครสมาชิกสำเร็จ!</CardTitle>
-        <CardDescription className='text-center text-base'>
+        <CardDescription className='text-center text-base space-y-4'>
           {customerCode ? (
             <>
-              รหัสลูกค้าของคุณคือ:
-              <div className='mt-3 text-3xl font-bold tracking-wider text-primary'>
-                {customerCode}
+              <div>
+                🆔 รหัสลูกค้าของคุณคือ:
+                <div className='mt-3 text-3xl font-bold tracking-wider text-primary'>
+                  {customerCode}
+                </div>
               </div>
-              <div className='mt-3 text-sm text-muted-foreground'>
-                📌 กรุณาจดรหัสนี้ไว้ใช้แจ้งเจ้าหน้าที่เวลาสอบถามหรือสั่งซื้อสินค้า
+              <div className='text-sm text-muted-foreground'>
+                📌 กรุณาใช้รหัสนี้แจ้งเจ้าหน้าที่<br />
+                เมื่อต้องการสอบถามหรือสั่งซื้อสินค้า
+              </div>
+              <div className='border-t pt-4 mt-4'>
+                <div className='text-lg font-semibold text-primary'>
+                  🎁 รับวัสดุปรุงดินฟรี!
+                </div>
+                <div className='text-sm mt-2 space-y-2 text-left'>
+                  <p>เพียงทำตามขั้นตอนง่าย ๆ 👇</p>
+                  <p>1️⃣ กดแชร์โพสต์กิจกรรมบน Facebook</p>
+                  <p>2️⃣ 📸 แคปหน้าจอหลังแชร์โพสต์</p>
+                  <p>3️⃣ 📲 ส่งภาพแคปหน้าจอมาทาง LINE OA</p>
+                  <p className='mt-3'>
+                    🔗 Facebook:{' '}
+                    <a
+                      href='https://www.facebook.com/share/p/1DCzWwQkuq/'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-primary underline hover:text-primary/80'
+                    >
+                      https://www.facebook.com/share/p/1DCzWwQkuq/
+                    </a>
+                  </p>
+                  <p className='mt-3 font-medium'>
+                    ✨ แชร์แล้วอย่าลืมส่งหลักฐาน เพื่อรับวัสดุปรุงดินฟรีนะคะ!
+                  </p>
+                </div>
               </div>
             </>
           ) : (
