@@ -15,12 +15,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface RegisterSearchParams {
   lineUserId?: string
-  referrerId?: string
+  referrerCode?: string
   token?: string
 }
 
 export function Register() {
-  const { lineUserId: urlLineUserId, referrerId, token } = useSearch({ from: '/register' }) as RegisterSearchParams
+  const { lineUserId: urlLineUserId, referrerCode, token } = useSearch({ from: '/register' }) as RegisterSearchParams
 
   const [resolvedLineUserId, setResolvedLineUserId] = useState<string | undefined>(urlLineUserId)
   const [tokenLoading, setTokenLoading] = useState(!!token)
@@ -105,7 +105,7 @@ export function Register() {
           ) : (
             <RegisterForm
               lineUserId={resolvedLineUserId}
-              referrerId={referrerId}
+              referrerCode={referrerCode}
               token={token}
               onSuccess={(code) => setSuccessCode(code)}
             />

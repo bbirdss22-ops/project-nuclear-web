@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createCustomer, consumeRegistrationToken } from '@/lib/api'
+import { createCustomer, consumeRegistrationToken, getCustomerReferrerByCode } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -57,7 +57,7 @@ type FormValues = z.infer<typeof formSchema>
 
 interface RegisterFormProps {
   lineUserId?: string
-  referrerId?: string
+  referrerCode?: string
   token?: string
 }
 
@@ -126,8 +126,11 @@ export function RegisterSuccess({
   )
 }
 
-export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: RegisterFormProps & { onSuccess?: (code: string) => void }) {
+export function RegisterForm({ lineUserId, referrerCode, token, onSuccess }: RegisterFormProps & { onSuccess?: (code: string) => void }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [referrerName, setReferrerName] = useState<string | null>(null)
+  const [referrerLoading, setReferrerLoading] = useState(!!referrerCode)
+  const [referrerMissing, setReferrerMissing] = useState(false)
   // const [bankBookFile, setBankBookFile] = useState<File | null>(null)
 
   const form = useForm<FormValues>({
@@ -145,6 +148,36 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
     },
   })
 
+  // Resolve the referrer display name from the share code (public-safe lookup).
+  useEffect(() => {
+    if (!referrerCode) return
+
+    let cancelled = false
+    setReferrerLoading(true)
+    setReferrerMissing(false)
+
+    getCustomerReferrerByCode(referrerCode)
+      .then((ref) => {
+        if (cancelled) return
+        const name =
+          ref.displayName ||
+          [ref.firstName, ref.lastName].filter(Boolean).join(' ').trim() ||
+          ref.code
+        setReferrerName(name || null)
+        setReferrerLoading(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setReferrerName(null)
+        setReferrerMissing(true)
+        setReferrerLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [referrerCode])
+
   async function onSubmit(data: FormValues) {
     setIsLoading(true)
 
@@ -157,7 +190,7 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
         address: data.address || undefined,
         plants: data.plants || undefined,
         lineUserId: lineUserId || undefined,
-        referrerId: referrerId || undefined,
+        referrerCode: referrerCode || undefined,
         // bankName: data.bankName || undefined,
         // bankAccountName: data.bankAccountName || undefined,
         // bankAccountNumber: data.bankAccountNumber || undefined,
@@ -211,6 +244,20 @@ export function RegisterForm({ lineUserId, referrerId, token, onSuccess }: Regis
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='grid gap-4'>
+        {referrerLoading ? (
+          <div className='flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm text-muted-foreground'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            กำลังตรวจสอบข้อมูลผู้แนะนำ…
+          </div>
+        ) : referrerName ? (
+          <div className='rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm'>
+            🎫 แนะนำโดย: <span className='font-semibold'>{referrerName}</span>
+          </div>
+        ) : referrerMissing ? (
+          <div className='rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive'>
+            ⚠️ ไม่พบข้อมูลผู้แนะนำ รหัสอ้างอิงนี้อาจไม่ถูกต้อง
+          </div>
+        ) : null}
         <div className='grid grid-cols-2 gap-3'>
           <FormField
             control={form.control}
