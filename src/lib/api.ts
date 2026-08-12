@@ -56,7 +56,7 @@ export interface CreateCustomerRequest {
   lineUserId?: string;
   address?: string;
   plants?: string;
-  referrerCode?: string;
+  referrerId?: string;
   bankName?: string;
   bankAccountName?: string;
   bankAccountNumber?: string;
@@ -164,21 +164,6 @@ export async function searchCustomers(q: string, page = 1, pageSize = 20): Promi
 
 export async function getCustomerById(id: string): Promise<Customer> {
   const res = await api.get<Customer>(`/api/customers/${id}`);
-  return res.data;
-}
-
-/**
- * Public-safe lookup of referrer display info by customer code.
- * Used by the registration page to show "แนะนำโดย: [ชื่อ]"
- * without exposing sensitive customer data.
- */
-export async function getCustomerReferrerByCode(code: string): Promise<{
-  code: string | null;
-  displayName: string | null;
-  firstName: string | null;
-  lastName: string | null;
-}> {
-  const res = await api.get(`/api/customers/referrer/${encodeURIComponent(code)}`);
   return res.data;
 }
 
