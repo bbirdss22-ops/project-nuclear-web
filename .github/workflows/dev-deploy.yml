@@ -1,0 +1,19 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # Vercel auto-deploys dev branch to preview — แค่ verify build ผ่าน
